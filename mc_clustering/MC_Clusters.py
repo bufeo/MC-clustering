@@ -171,7 +171,7 @@ class MC_Clusters:
 
             description += 'For density threshold ' + str(self.density_th) + ':\n'
             description += '* found %d points' %(self.info['number of points']) + '\n'
-            description += '* containing %2.2f%% of the total mass' %(self.info['fraction of mass']) + '\n\n'
+            description += '* containing %2.2f%% of the total mass' %(self.info['fraction of mass']*100) + '\n\n'
 
             description += 'clustering the data gave:\n'
             description += '# of clusters found in 1st iteration: ' + self.info['nMCs first iteration'] + '\n'
