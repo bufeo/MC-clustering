@@ -29,6 +29,12 @@ class MC_Simulation:
             self.n = input.attrs[u'Size']
             self.sizeL = input.attrs[u'Physical size']
             self.n3 = self.n*self.n*self.n
+            self.zi = input.attrs[u'zInitial']
+            self.zf = input.attrs[u'zFinal']
+            self.zc = input.attrs[u'z']
+            self.llambda = input.attrs[u'Lambda']
+            self.nQCD = input.attrs[u'nQcd']
+            
             
         # 1.d) create output file & write header
         #      an existing file of the same name will be reased

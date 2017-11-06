@@ -55,11 +55,20 @@ class MC_Clusters:
         mnr, moi = analyse_mcs(self.masslabels, self.den, labels, labels2, self.pos, Sim)
 
         # 1.f) save all information to the class
+
+        # information copied from the simulation class
         self.n = Sim.n
         self.n3 = (self.n)**3
         self.sizeL = Sim.sizeL
-        self.density_th = dens_th
         self.input_data = Sim.input_data
+        self.zi = Sim.zi
+        self.zf = Sim.zf
+        self.zc = Sim.zc
+        self.llambda = Sim.llambda
+        self.nQCD = Sim.nQCD
+
+        # information specific to the cluster class
+        self.density_th = dens_th
         self.output_data = Sim.output_file
         self.plot_file = Sim.output_prefix + '_th-' +  str(self.density_th) + '_plots.pdf'
         self.n_points = mnr[:,0]
@@ -165,9 +174,16 @@ class MC_Clusters:
             ax.axis('off')
 
             description =  'data file: ' + self.input_data + '\n'
-            description += 'results saved to: ' + self.output_data + '\n'
+            description += 'results saved to: ' + self.output_data + '\n\n'
+
+            description += 'simulation parameters:\n'
             description += 'points per axis: ' + str(self.n) + '\n'
-            description += 'physical grid size: ' + str(self.sizeL) + '\n\n'
+            description += 'physical grid size: ' + str(self.sizeL) + '\n'
+            description += 'initial time: ' + str(self.zi) + '\n'
+            description += 'final time: ' + str(self.zf) + '\n'
+            description += 'analytical evolution until: ' + str(self.zc) + '\n'
+            description += 'lambda factor: '+ str(self.llambda) + '\n'
+            description += 'QCD exponent: ' + str(self.nQCD) + '\n\n'
 
             description += 'For density threshold ' + str(self.density_th) + ':\n'
             description += '* found %d points' %(self.info['number of points']) + '\n'
@@ -343,8 +359,12 @@ class MC_Clusters:
             titlestring ='%d th heaviest ' %(label+1)
 
         titlestring += 'cluster found for a thereshold of ' + str(self.density_th) +  '.\n'
-        titlestring += 'Cluster mass: %1.2f $\\times M_1$, number of points: %d .' %((self.sizeL/self.n)**3*self.mass[label],
+        titlestring += 'Cluster mass: %1.2f $\\times M_1$, number of points: %d.\n' %((self.sizeL/self.n)**3*self.mass[label],
                                                                                          self.n_points[label])
+        mix = min(self.momentum_of_inertia[label])
+        man = max(self.momentum_of_inertia[label])
+        titlestring += 'Eccentricity $\\left(I_{max}-I_{min}\\right)/\\left(I_{max}+I_{min}\\right)$ = %1.2f' %((man-mix)/(man+mix)) 
+        
     
         legend.set_title(titlestring,prop = {'size':'large'})
         gs.update(wspace=.1, hspace=.1)
