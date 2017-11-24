@@ -59,6 +59,7 @@ class MC_Clusters:
         # information copied from the simulation class
         self.n = Sim.n
         self.n3 = (self.n)**3
+        self.norm = Sim.norm
         self.sizeL = Sim.sizeL
         self.input_data = Sim.input_data
         self.zi = Sim.zi

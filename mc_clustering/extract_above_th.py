@@ -1,6 +1,7 @@
 import h5py
 import MC_Simulation
 import numpy as np
+import sys
 
 def extract_above_th(dens_th, Sim):
 
@@ -9,7 +10,12 @@ def extract_above_th(dens_th, Sim):
     
     # extract data from file
     with h5py.File(Sim.input_data, 'r') as input:
-        data = input['energy/density'].value.reshape(n3)
+        try:
+            data = input['energy/redensity'].value.reshape(n3)
+        except KeyError:
+            data = input['energy/density'].value.reshape(n3)
+            
+    data = data/Sim.norm
 
     # mask all points below the density thereshold
     mask = ( data > dens_th)

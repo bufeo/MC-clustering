@@ -1,7 +1,10 @@
 import csv
 import h5py
+import numpy as np
 
 from MC_Clusters import MC_Clusters
+from find_sim_properties import find_norm
+from find_sim_properties import find_n
 
 class MC_Simulation:
     """Class to hold all information on one simulation"""
@@ -19,22 +22,24 @@ class MC_Simulation:
         self.min_samples = kwargs.pop('min_samples',20)
         self.algorithm = kwargs.pop('algorithm','kd_tree')
         self.n_jobs = kwargs.pop('n_jobs',-1)
-
+        self.norm = kwargs.pop('norm',-1.)
+        
         # 1.b) initialize variables holding the analysis
         self.cluster_list = dict()
 
         # 1.c) get information about the simulation
         #      and test if the input file can be opend
         with h5py.File(input_data, 'r') as input:
-            self.n = input.attrs[u'Size']
             self.sizeL = input.attrs[u'Physical size']
-            self.n3 = self.n*self.n*self.n
             self.zi = input.attrs[u'zInitial']
             self.zf = input.attrs[u'zFinal']
             self.zc = input.attrs[u'z']
             self.llambda = input.attrs[u'Lambda']
             self.nQCD = input.attrs[u'nQcd']
-            
+            self.res = input.attrs[u'Size']
+        self.n = find_n(self)
+        self.n3 = self.n*self.n*self.n
+        self.norm = find_norm(self)  #needs to be calles after n3 is defined  
             
         # 1.d) create output file & write header
         #      an existing file of the same name will be reased

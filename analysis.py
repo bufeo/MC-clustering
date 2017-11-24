@@ -2,31 +2,21 @@ import sys
 sys.path.append('./mc_clustering')
 
 from MC_Simulation import MC_Simulation
+from analyse_norm import analyse_norm
 import matplotlib.pyplot as plt
 
 print('\n         ANALYZING MINICLUSTERS         ')
 print('----------------------------------------')
 
-th_list = [5, 7, 10]
+#----------finding the norm----------
+sims, norm = analyse_norm('./data', './results/test_norm', './results/test_norm/summary')
 
-mc1 = MC_Simulation('./data/density_maps/L=2, 1024-_128(WKB)/axion.r.00076',
-                   './results/test/L2-00076')
+#----------the analyse the clusters----------
+#den_th = [5, 10, 15]
+#for i in sim_list:
+#    for th in den_th:
 
-mc2 = MC_Simulation('./data/density_maps/L=3, 1536 -_ 256(WKB)/axion.r.00039',
-                   './results/test/L3-00039')
-
-mc3 = MC_Simulation('./data/density_maps/L=4, 1024-_256(WKB)/axion.r.00076',
-                   './results/test/L4-00076')
-
-
-mcs = [mc1, mc2, mc3]
-
-#mcs = [mc1]
-#th_list = [7]
-
-for mc in mcs:
-    for th in th_list:
-        mc.find_clusters(th)
-        mc.cluster_list[th].plot_all()
+#        sim[i].find_clusters(th, norm=norm)
+#        sim[i].cluster_list[th].plot_all()
 
 

@@ -9,7 +9,7 @@ def density_profile(mcs, lmc):
 
     # compute the COM & possible coordinate shift
     com1, shift_vec = cluster_com(lmc, mcs.masslabels, mcs.pos, mcs.den, mcs.n)
-        
+    
     # define the maximum radius
     radius= mcs.r_90pc[lmc]
     rmax = 1.5*radius
