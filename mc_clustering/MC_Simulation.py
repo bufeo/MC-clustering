@@ -34,8 +34,14 @@ class MC_Simulation:
             self.zi = input.attrs[u'zInitial']
             self.zf = input.attrs[u'zFinal']
             self.zc = input.attrs[u'z']
-            self.llambda = input.attrs[u'Lambda']
-            self.nQCD = input.attrs[u'nQcd']
+            try:
+                self.llambda = input.attrs[u'Lambda']
+            except:
+                self.llambda = -1
+            try:
+                self.nQCD = input.attrs[u'nQcd']
+            except:
+                self.nQCD = -1
             self.res = input.attrs[u'Size']
         self.n = find_n(self)
         self.n3 = self.n*self.n*self.n

@@ -9,7 +9,7 @@ print('\n         ANALYZING MINICLUSTERS         ')
 print('----------------------------------------')
 
 #----------finding the norm----------
-sims, norm = analyse_norm('./data', './results/test_norm', './results/test_norm/summary')
+sims, norm = analyse_norm('./data/simulation_results', './results/test_norm', './results/test_norm/summary')
 
 #----------the analyse the clusters----------
 #den_th = [5, 10, 15]

@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+import matplotlib.pyplot as plt
 
 from MC_Simulation import MC_Simulation
 import matplotlib.pyplot as plt
@@ -47,7 +48,41 @@ def analyse_norm(in_dir, out_dir, out_file):
         sig= np.std(norms_per_sim)
         
         f.write('\ncombined result from all files: norm = %f +- %f' %(norm, sig))
+        plot_norms_over_delta(norms_per_set, norm, sig, out_file)
                     
     return sims, norm
+
+def plot_norms_over_delta(norm_list, norm, sig, out_file):
+
+    out_name = out_file + '.pdf'
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    # plot combined results
+    plt.axhline(y=norm, color='g', linestyle='-')
+    plt.axhspan(norm-sig, norm+sig, facecolor='g', alpha=0.2)
+    
+    # plot results for individual sets
+    for set in norm_list:
+
+        label = '$L= %1.1f$, $N= %d$' %(set[0][0],set[0][1])
+        delta = set[0][0]/set[0][1]
+
+        plt.errorbar(delta, set[1], yerr=set[2], xerr=None, fmt='o', label=label, ls=None, capsize=4)
+
+    plt.ylabel('average density [$(f_a H_1/\\tau)^2$]')
+    plt.xlabel('grid spacing [$H_1 R_1$]')
+    legend = plt.legend(numpoints=1)
+    legend.get_frame().set_facecolor('white')
+    legend.get_frame().set_edgecolor('white')
+
+    plt.savefig(out_name)
+
+    return
+
+        
+    
+        
+    
 
 
