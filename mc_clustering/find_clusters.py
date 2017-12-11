@@ -6,7 +6,7 @@ import sys
 def find_clusters(pos, Sim):
 
     # 1. cluster the original data set
-    print 'clustering original data...',
+    print '-> clustering original data...',
     sys.stdout.flush()
 
     db = DBSCAN(eps=Sim.eps, min_samples=Sim.min_samples,
@@ -21,7 +21,7 @@ def find_clusters(pos, Sim):
     pos2 = (pos + [nh,nh,nh])%n
 
     # 3. cluster the shifted data set
-    print 'clustering shifted data...',
+    print '-> clustering shifted data...',
     sys.stdout.flush()
        
     db2 = DBSCAN(eps=Sim.eps, min_samples=Sim.min_samples,

@@ -2,7 +2,7 @@ import numpy as np
 
 def join_boundaries(labels, labels2):
 
-    print 'accounting for periodic boundaries...',
+    print '-> accounting for periodic boundaries...',
     npo = len(labels)
         
     # 1. create auxilliary label arrays

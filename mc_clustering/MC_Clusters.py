@@ -30,7 +30,7 @@ class MC_Clusters:
         self.info = {}
 
         # 1.a) extract all points above thereshold
-        print 'extracting points above threshold...',
+        print '-> extracting points above threshold...',
         sys.stdout.flush()
         
         self.pos, self.den, self.info['number of points'], self.info['fraction of mass'] = extract_above_th(dens_th, Sim)

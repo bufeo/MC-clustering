@@ -8,8 +8,6 @@ from collect_sims import collect_sims
 
 def analyse_norm(in_dir, out_dir, out_file):
 
-    print('\n1.) ANALYZING MC-NORMALISATION         ')
-
     sim_list, out_list = collect_sims(in_dir, out_dir)
     
     sim_dat = {}

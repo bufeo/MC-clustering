@@ -61,7 +61,7 @@ def cluster_com(label, masslabels, pos, den, n):
 
 def analyse_mcs(masslabels, den, labels, labels2, pos, Sim):
 
-    print 'analyzing clusters...',
+    print '-> analyzing clusters...',
     sys.stdout.flush()
     
     dapa =[]
