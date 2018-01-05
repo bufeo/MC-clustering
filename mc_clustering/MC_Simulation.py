@@ -17,7 +17,7 @@ class MC_Simulation:
         # 1.a) initialize arguments
         self.input_data = input_data
         self.output_prefix = output_prefix
-        self.output_file = output_prefix + '.csv'
+        self.output_file = output_prefix + '.dat'
         self.eps = kwargs.pop('eps',2)
         self.min_samples = kwargs.pop('min_samples',20)
         self.algorithm = kwargs.pop('algorithm','kd_tree')
@@ -48,8 +48,9 @@ class MC_Simulation:
         self.norm = find_norm(self)  #needs to be calles after n3 is defined  
             
         # 1.d) create output file & write header
-        #      an existing file of the same name will be reased
+        #      an existing file of the same name will be erased
         self.fieldnames = ['density_th',
+                           'norm',
                            'n_points',
                            'mass',
                            'r_half_max',
@@ -82,7 +83,7 @@ class MC_Simulation:
         # 2.c) write results to output
         with open(self.output_file, 'a') as output:
             writer = csv.DictWriter(output, fieldnames=self.fieldnames)
-            writer.writerow({'density_th':thereshold, 'n_points':mc.n_points, 'mass':mc.mass,
+            writer.writerow({'density_th':thereshold, 'norm':self.norm, 'n_points':mc.n_points, 'mass':mc.mass,
                              'r_half_max':mc.r_half_max, 'r_90pc':mc.r_90pc,
                              'r_mass_weighted':mc.r_mass_weighted, 'momentum_of_inertia':mc.momentum_of_inertia})
 

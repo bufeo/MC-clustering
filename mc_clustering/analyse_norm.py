@@ -14,6 +14,7 @@ def analyse_norm(in_dir, out_dir, out_file):
     sims = []
     out_txt = out_file + '.txt'
     with open(out_txt, 'w') as f:
+        
         f.write('ANALYZING MC NORMALISATION\n\n')
         f.write('including the following files:\n')
         print('\nincluding following files:')
@@ -28,6 +29,11 @@ def analyse_norm(in_dir, out_dir, out_file):
             else:
                 sim_dat[(sim.sizeL, sim.res)] = [sim.norm]
 
+        same, tmin, tmax = check_final_time(sims)
+        if not same:
+            f.write('\nWARNING: not all data sets have the same final time:\n\n')
+            f.write('%1.2f < z_final < %1.2f' %(tmin, tmax))
+                
         print('\nobtaining norms:')
         f.write('\nnorms found for individual sets:\n')
         norms_per_set = []
@@ -44,10 +50,16 @@ def analyse_norm(in_dir, out_dir, out_file):
 
         norm = np.mean(norms_per_sim)
         sig= np.std(norms_per_sim)
+
+        print('\ncombined norm = %f +- %f' %(norm, sig))
         
         f.write('\ncombined result from all files: norm = %f +- %f' %(norm, sig))
         plot_norms_over_delta(norms_per_set, norm, sig, out_file)
-                    
+
+    #in the end we want to return a set of comonly normalized simulations
+    for sim in sims:    
+        sim.norm = norm
+        
     return sims, norm
 
 def plot_norms_over_delta(norm_list, norm, sig, out_file):
@@ -78,8 +90,21 @@ def plot_norms_over_delta(norm_list, norm, sig, out_file):
 
     return
 
-        
+def check_final_time(sim_list):
     
+    times = [sim.zf for sim in sim_list]
+    t_max = max(times)
+    t_min = min(times)
+
+    same_time = False
+    if t_max == t_min:
+        same_time = True
+
+    if not same_time:
+        print('\nWARNING: not all data sets have the same final time:')
+        print('%1.2f < z_final < %1.2f' %(t_min, t_max))
+        
+    return same_time, t_min, t_max
         
     
 

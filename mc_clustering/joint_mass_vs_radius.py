@@ -3,6 +3,7 @@ from MC_Clusters import MC_Clusters
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
+from analyse_norm import check_final_time
 
 def joint_mass_vs_radius(sim_list, th, out_name, **kwargs):
     
@@ -51,7 +52,11 @@ def joint_mass_vs_radius(sim_list, th, out_name, **kwargs):
             for mc in mc_list[dset]:
                 log_out.write('-> %s\n' %(mc.input_data))
     
-
+    same, tmin, tmax = check_final_time(sim_list)
+    if not same:
+        with open(log_filename, 'a') as log_out:
+            log_out.write('WARNING: not all data sets have the same final time:\n\n')
+            log_out.write('%1.2f < z_final < %1.2f\n' %(tmin, tmax))
             
     #5.) initialize colors
     n_col = len(mc_list.keys())
