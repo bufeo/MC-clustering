@@ -25,36 +25,45 @@ class MC_Clusters:
     ##############################
     # 1. Constructor
     ##############################
-    def __init__(self, dens_th, Sim):
+    def __init__(self, dens_th, Sim, **kwargs):
 
         self.info = {}
+        preexists = kwargs.pop('preexists', False)
 
-        # 1.a) extract all points above thereshold
-        print '-> extracting points above threshold...',
-        sys.stdout.flush()
+        if not preexists:
+            # 1.a) extract all points above thereshold
+            print '-> extracting points above threshold...',
+            sys.stdout.flush()
         
-        self.pos, self.den, self.info['number of points'], self.info['fraction of mass'] = extract_above_th(dens_th, Sim)
-        print('done')
+            self.pos, self.den, self.info['number of points'], self.info['fraction of mass'] = extract_above_th(dens_th, Sim)
+            print('done')
     
-        # 1.b) cluster original and shifted set
-        labels, labels2 = find_clusters(self.pos, Sim)
-        self.info['nMCs first iteration'] = str(len(set(labels))-1)
-        self.info['nMCs second iteration'] = str(len(set(labels2))-1)
+            # 1.b) cluster original and shifted set
+            labels, labels2 = find_clusters(self.pos, Sim)
+            self.info['nMCs first iteration'] = str(len(set(labels))-1)
+            self.info['nMCs second iteration'] = str(len(set(labels2))-1)
 
-        # 1.c) join periodic boundaries
-        newlabels = join_boundaries(labels, labels2)
+            # 1.c) join periodic boundaries
+            newlabels = join_boundaries(labels, labels2)
         
-        # 1.d) find labels ordered by mass
-        self.masslabels = relabel_mass(newlabels, self.den)
+            # 1.d) find labels ordered by mass
+            self.masslabels = relabel_mass(newlabels, self.den)
 
-        # 1.e) analyse the miniclusters:
-        #      mass
-        #      number of points
-        #      radius
-        #      momentum of inertia
-        mnr, moi = analyse_mcs(self.masslabels, self.den, labels, labels2, self.pos, Sim)
+            # 1.e) analyse the miniclusters:
+            #      mass
+            #      number of points
+            #      radius
+            #      momentum of inertia
+            mnr, moi = analyse_mcs(self.masslabels, self.den, labels, labels2, self.pos, Sim)
 
-        # 1.f) save all information to the class
+            # 1.f) save all information to the class
+            # cluster information computed here
+            self.n_points = mnr[:,0]
+            self.mass = mnr[:,1]
+            self.r_half_max = mnr[:,2]
+            self.r_mass_weighted = mnr[:,3]
+            self.r_90pc = mnr[:,4]
+            self.momentum_of_inertia = moi
 
         # information copied from the simulation class
         self.n = Sim.n
@@ -72,12 +81,7 @@ class MC_Clusters:
         self.density_th = dens_th
         self.output_data = Sim.output_file
         self.plot_file = Sim.output_prefix + '_th-' +  str(self.density_th) + '_plots.pdf'
-        self.n_points = mnr[:,0]
-        self.mass = mnr[:,1]
-        self.r_half_max = mnr[:,2]
-        self.r_mass_weighted = mnr[:,3]
-        self.r_90pc = mnr[:,4]
-        self.momentum_of_inertia = moi
+        
 
 
     ##############################

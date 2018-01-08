@@ -29,6 +29,7 @@ def analyse_norm(in_dir, out_dir, out_file):
             else:
                 sim_dat[(sim.sizeL, sim.res)] = [sim.norm]
 
+        # check if the final timesof all simulations agree, if not giva a warning
         same, tmin, tmax = check_final_time(sims)
         if not same:
             f.write('\nWARNING: not all data sets have the same final time:\n\n')

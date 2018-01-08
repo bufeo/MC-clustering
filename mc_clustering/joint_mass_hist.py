@@ -6,25 +6,32 @@ from analyse_norm import check_final_time
 
 def joint_mass_hist(sim_list, th, out_name, **kwargs):
 
-    print('-> joint mass histogramm for thereshold %1.1f' %(th))
-
     #1.) read keyword arguments & check
     lonly = kwargs.pop('only_L', 0)
     nonly = kwargs.pop('only_N', 0)
     donly = kwargs.pop('only_D', 0)
 
     if lonly+nonly+donly > max([lonly, donly, nonly]):
-        print('\nERROR in computing the joint mass histogramm')
-        print('too many constraints on simulation parameters')
+        print('\nERROR in computing the joint mass histogramm:')
+        print('too many constraints on simulation parameters.')
         print('you can specify at most one of the following options:')
-        print('only_L, only_N, only_D\n')
+        print('only_L, only_N, only_D.\n')
         return
     
     elif lonly<0 or nonly<0 or donly<0:
-        print('\nERROR in computing the joint mass histogramm')
-        print('the following optional argumnts can only be positiv:')
-        print('only_L, only_N, only_D\n')
+        print('\nERROR in computing the joint mass histogramm:')
+        print('the following optional argumnts can only be positiv')
+        print('only_L, only_N, only_D.\n')
         return
+
+    message = '-> joint mass histogramm for thereshold %1.1f' %(th)
+    if lonly>0:
+        message += ' and L = %1.2f' %(lonly)
+    elif nonly>0:
+        message += ' and N = %d' %(donly)
+    elif donly>0:
+        message += ' and delta = %1.5f' %(donly)
+    print(message)
         
     #2.) initialise outputs & test if the log-file can be opened
     plot_filename = out_name + '.pdf'
@@ -59,13 +66,13 @@ def joint_mass_hist(sim_list, th, out_name, **kwargs):
             incl = True
             if lonly>0 and sim.sizeL != lonly:
                 incl = False
-            elif nonly>0 and sim.n != lonly:
+            elif nonly>0 and sim.res != nonly:
                 incl = False
-            elif donly>0 and (sim.sizeL/sim.n) != donly:
+            elif donly>0 and (sim.sizeL/sim.res) != donly:
                 incl = False
 
             if incl:
-                
+
                 # compute cluster mass normalized to M_1
                 unitmass = (sim.sizeL/sim.n)**3
                 mmcs = sim.cluster_list[th].mass*unitmass
