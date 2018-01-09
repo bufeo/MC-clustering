@@ -8,3 +8,5 @@ results/*
 .gitignore
 *.py~
 *.pyc
+*/*.pyc
+*/*.py~
