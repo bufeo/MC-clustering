@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from analyse_norm import check_final_time
+from joint_mass_hist import check_norm
 
 def joint_mass_vs_radius(sim_list, th, out_name, **kwargs):
     
@@ -51,13 +52,22 @@ def joint_mass_vs_radius(sim_list, th, out_name, **kwargs):
         for dset in mc_list.keys():
             for mc in mc_list[dset]:
                 log_out.write('-> %s\n' %(mc.input_data))
-    
+
+    # 5.) check is all simulations have the same final time
     same, tmin, tmax = check_final_time(sim_list)
     if not same:
         with open(log_filename, 'a') as log_out:
             log_out.write('WARNING: not all data sets have the same final time:\n\n')
             log_out.write('%1.2f < z_final < %1.2f\n' %(tmin, tmax))
-            
+
+    #6.) check if all simulations have the same norm
+    same, tmin, tmax = check_norm(sim_list)
+    if not same:
+        with open(log_filename, 'a') as log_out:
+            log_out.write('\nWARNING: not all data sets have the same normalization:\n')
+            log_out.write('%1.2f < norm < %1.2f\n' %(tmin, tmax))
+
+    
     #5.) initialize colors
     n_col = len(mc_list.keys())
     colors = [plt.cm.jet(each)

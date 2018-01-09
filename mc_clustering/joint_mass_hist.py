@@ -89,30 +89,61 @@ def joint_mass_hist(sim_list, th, out_name, **kwargs):
         log_out.write('=> total number of clusters: %d' %(len(mc_masses)))
         log_out.write('\n')
 
-    #4.) check that all simulations have the same final time
+    #4.) check if all simulations have the same final time
     same, tmin, tmax = check_final_time(sim_list)
     if not same:
         with open(log_filename, 'a') as log_out:
             log_out.write('WARNING: not all data sets have the same final time:\n\n')
             log_out.write('%1.2f < z_final < %1.2f\n' %(tmin, tmax))
-                
-    #5.) to show the fractional distribution instead of apsolute number
+
+    #5.) check if all simuations have the same normalization
+    same, nmin, nmax = check_norm(sim_list)
+    if not same: 
+        with open(log_filename, 'a') as log_out:
+            log_out.write('\nWARNING: not all data sets have the same normalization:\n')
+            log_out.write('%1.2f < norm < %1.2f\n' %(nmin, nmax))
+
+    
+    #6.) to show the fractional distribution instead of apsolute number
     #    introduce a weight. This changes only the labels in the y-axis.
     weights = np.ones_like(mc_masses)/float(len(mc_masses))
 
-    #6.) customize the plot
+    #7.) customize the plot
     fig = plt.figure()
     ax = fig.add_subplot(111)
     plt.xscale('log')
     plt.xlabel('Mass [$M_1$]')
     plt.title('Distribution of MC masses for a Threshold of %1.1f' %(th))
 
-    #7.) plot and save
+    #8.) plot and save
     plt.hist(mc_masses,bins=np.logspace(-5,1,20), lw=0,weights=weights)
     plt.savefig(plot_filename)
     
-    #8.) print additional
+    #9.) print additional
     with open(log_filename, 'a') as log_out:
         log_out.write('\n...plotting finished succesfully')
 
     print('   saved to: %s' %(plot_filename))
+
+
+##################################################
+# functionality to check for consistant norms
+##################################################
+
+def check_norm(sim_list):
+    
+    norms = [sim.norm for sim in sim_list]
+    n_max = max(norms)
+    n_min = min(norms)
+
+    same_norm = False
+    if n_max == n_min:
+        same_norm = True
+    if -1 in norms:
+        same_norm = False
+        
+    if not same_norm:
+        print('\nWARNING: not all data sets have the same normalizatio:')
+        print('%1.2f < norm < %1.2f\n' %(n_min, n_max))
+        
+    return same_norm, n_min, n_max

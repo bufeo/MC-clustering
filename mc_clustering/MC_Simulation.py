@@ -17,7 +17,7 @@ class MC_Simulation:
         # 1.a) initialize arguments
         self.input_data = input_data
         self.output_prefix = output_prefix
-        self.output_file = output_prefix + '.csv'
+        self.output_file = output_prefix + '.hdf5'
         self.eps = kwargs.pop('eps',2)
         self.min_samples = kwargs.pop('min_samples',20)
         self.algorithm = kwargs.pop('algorithm','kd_tree')
@@ -49,31 +49,20 @@ class MC_Simulation:
         self.norm = find_norm(self)  #needs to be calles after n3 is defined  
             
         # 1.d) if there is no pre-existing output file:
-        #      create output file & write header
-        #      an existing file of the same name will be erased
+        #      create output file & write information abou simulation
+        #      (an existing file of the same name will be erased)
         if self.preexists == False:
-            self.fieldnames = ['density_th',
-                               'norm',
-                               'n_points',
-                               'mass',
-                               'r_half_max',
-                               'r_90pc',
-                               'r_mass_weighted',
-                               'momentum_of_inertia']
-    
-            with open(self.output_file, 'w') as output:
-                output.write('# %s\n' %(self.input_data))
-                writer = csv.DictWriter(output, fieldnames=self.fieldnames)
-                writer.writeheader()
+
+            with h5py.File(self.output_file, 'w') as out_writer:
+                out_writer.attrs['simulation_file'] = self.input_data      
 
         # 1.c) if there is a pre-existing output file:
         #      check it refers to the correct data file
         #      and read in all analysis from it
         else:
-            with open(self.output_file, 'r') as output:
-                ifile = output.readline()
-                ifile = ifile[2:].strip()
-
+            with h5py.File(self.output_file, 'r') as out_reader:
+                ifile = out_reader.attrs[u'simulation_file']
+         
                 # check the input file is correct
                 if ifile != self.input_data:
                     print('\nERROR in reading data from a previous analysis:')
@@ -81,28 +70,40 @@ class MC_Simulation:
                     print('Aborting computation.\n')
                     exit()
 
-                #read in data for the individual clusters
-                reader = csv.DictReader(output)
-                for row in reader:
-                    
+                #loop over all thresholds saved in the file
+                for th_grp in out_reader:
+
+                    grp = out_reader[th_grp]
                     # call the constructor to get all basic information
-                    thereshold = float(row['density_th'])
+                    thereshold = grp.attrs['threshold']
                     mc = MC_Clusters(thereshold, self, preexists=True)
 
                     # assign data read from file
-                    mc.norm = float(row['norm'])
-                    mc.n_points            = string_to_array(row['n_points'],            1)
-                    mc.mass                = string_to_array(row['mass'],                1)
-                    mc.r_half_max          = string_to_array(row['r_half_max'],          1)
-                    mc.r_mass_weighted     = string_to_array(row['r_mass_weighted'],     1)
-                    mc.r_90pc              = string_to_array(row['r_90pc'],              1)
-                    mc.momentum_of_inertia = string_to_array(row['momentum_of_inertia'], 3)
+                    n_clusters             = grp.attrs['n_clusters']
+                    mc.norm                = grp.attrs[u'norm']
+                    mc.n_points            = grp['n_points'].value
+                    mc.mass                = grp['mass'].value
+                    mc.r_half_max          = grp['r_half_max'].value
+                    mc.r_mass_weighted     = grp['r_mass_weighted'].value
+                    mc.r_90pc              = grp['r_90pc'].value
+                    mc.momentum_of_inertia = grp['momentum_of_inertia'].value
                   
                     # append to the cluster list
                     self.cluster_list[thereshold] = mc
                     print('-> data file: %s, simulation file: %s, threshold %1.2f' %(ifile ,self.output_file, float(thereshold)))
 
-                    
+                # 1.d) make sure all clusters have the same normalization
+                #      and assign it to the simulation norm
+                norms = [self.cluster_list[th].norm for th in self.cluster_list.keys()]
+                nmin = min(norms)
+                nmax = max(norms)
+                if nmin == nmax:
+                    self.norm = nmin
+                else:
+                    self.norm = -1
+                    print('\nWARNING: not all clusters in this set use the same threshold.')
+                    print('           %1.2f < norm < %1.2f\n' %(nmin, nmax))
+                
     ##############################
     # 2. cluster properties for certain thereshold
     ##############################
@@ -117,42 +118,30 @@ class MC_Simulation:
         self.cluster_list[thereshold] = mc
 
         # 2.c) write results to output
-        with open(self.output_file, 'a') as output:
-            writer = csv.DictWriter(output, fieldnames=self.fieldnames)
-            mom = ''.join(str(e) for e in mc.momentum_of_inertia)
-            writer.writerow({'density_th':thereshold, 'norm':self.norm, 'n_points':mc.n_points, 'mass':mc.mass,
-                             'r_half_max':mc.r_half_max, 'r_90pc':mc.r_90pc,
-                             'r_mass_weighted':mc.r_mass_weighted, 'momentum_of_inertia':mom})
+        with h5py.File(self.output_file, 'a') as out_writer:
+        
+            grp = out_writer.create_group(str(thereshold))
+        
+            grp.attrs['norm'] = self.norm
+            grp.attrs['threshold'] = thereshold
+            grp.attrs['n_clusters'] = len(mc.n_points)
+        
+            dset = grp.create_dataset("n_points", (len(mc.n_points),), dtype='f')
+            dset[...] = mc.n_points
+            dset = grp.create_dataset("mass", (len(mc.mass),), dtype='f')
+            dset[...] = mc.mass
+            dset = grp.create_dataset("r_half_max", (len(mc.r_half_max),), dtype='f')
+            dset[...] = mc.r_half_max
+            dset = grp.create_dataset("r_90pc", (len(mc.r_90pc),), dtype='f')
+            dset[...] = mc.r_90pc
+            dset = grp.create_dataset("r_mass_weighted", (len(mc.r_mass_weighted),), dtype='f')
+            dset[...] = mc.r_mass_weighted
+            dset = grp.create_dataset("momentum_of_inertia", (len(mc.momentum_of_inertia),3), dtype='f')
+            dset[...] = mc.momentum_of_inertia
             
+            out_writer.close()
             print('-> saved results to %s\n' %(self.output_file))
+
              
 
 
-##############################
-# some functionality to read miniclusters from file
-# only used if preexists == True
-##############################
-def string_to_array(string, ndim):
-
-    if ndim == 1:
-        array = string.split()
-        array[-1] = array[-1].replace(']','')
-        array = [float(s) for s in array[1:]]
-        array = np.array(array)
-
-    elif ndim == 3:
-        print(string)
-        string = string.replace(']','')
-        string = string.replace('[','')
-        string = string.replace('\n','')
-        print(string.split())        
-        string = [float(s) for s in string.split()]
-        
-        array = []       
-        for i in range(0, len(string)/3):
-            ar0 = string[3*i]
-            ar1 = string[3*i + 1]
-            ar2 = string[3*i + 2]
-            array.append([ar0, ar1, ar2])
-            
-    return array
